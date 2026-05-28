@@ -433,6 +433,47 @@ class Feedback(BaseModel):
     created_at: Optional[datetime] = None
 
 
+# --- Learning ---
+
+
+class LearningStats(BaseModel):
+    id: Optional[str] = None
+    agent_id: str
+    period_start: Optional[datetime] = None
+    period_end: Optional[datetime] = None
+    helpful_count: int = 0
+    unhelpful_count: int = 0
+    ignored_count: int = 0
+    contradicted_count: int = 0
+    outdated_count: int = 0
+    success_count: int = 0
+    failure_count: int = 0
+    neutral_count: int = 0
+    confidence_increases: int = 0
+    confidence_decreases: int = 0
+    memories_reinforced: int = 0
+    memories_archived: int = 0
+    learning_velocity: Optional[float] = None
+    stability_score: Optional[float] = None
+    created_at: Optional[datetime] = None
+
+
+class MutationLog(BaseModel):
+    id: str
+    memory_id: str
+    agent_id: str
+    mutation_type: str
+    source_type: str
+    source_id: Optional[str] = None
+    old_confidence: Optional[float] = None
+    new_confidence: Optional[float] = None
+    old_reinforcement_count: Optional[int] = None
+    new_reinforcement_count: Optional[int] = None
+    reason: str
+    metadata: Optional[Dict[str, Any]] = None
+    created_at: Optional[datetime] = None
+
+
 # --- Health & Metrics ---
 
 

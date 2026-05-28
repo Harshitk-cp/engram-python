@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import Any, Dict, Optional, Type, TypeVar
 
 import httpx
@@ -31,12 +32,17 @@ class _BaseClient:
 
     def __init__(
         self,
-        base_url: str = "http://localhost:3741",
+        base_url: Optional[str] = None,
         api_key: Optional[str] = None,
         timeout: float = 30.0,
     ) -> None:
-        self.base_url = base_url.rstrip("/")
-        self.api_key = api_key
+        resolved_url = base_url or os.environ.get("ENGRAM_BASE_URL")
+        if not resolved_url:
+            raise ValueError(
+                "base_url is required. Pass it explicitly or set the ENGRAM_BASE_URL environment variable."
+            )
+        self.base_url = resolved_url.rstrip("/")
+        self.api_key = api_key or os.environ.get("ENGRAM_API_KEY")
         self.timeout = timeout
 
     def _headers(self) -> Dict[str, str]:
@@ -76,7 +82,7 @@ class SyncHTTPClient(_BaseClient):
 
     def __init__(
         self,
-        base_url: str = "http://localhost:3741",
+        base_url: Optional[str] = None,
         api_key: Optional[str] = None,
         timeout: float = 30.0,
         http_client: Optional[httpx.Client] = None,
@@ -84,7 +90,6 @@ class SyncHTTPClient(_BaseClient):
         super().__init__(base_url, api_key, timeout)
         self._client = http_client or httpx.Client(
             base_url=self.base_url,
-            headers=self._headers(),
             timeout=self.timeout,
         )
         self._owns_client = http_client is None
@@ -98,7 +103,9 @@ class SyncHTTPClient(_BaseClient):
         params: Optional[Dict[str, Any]] = None,
     ) -> Any:
         try:
-            response = self._client.request(method, path, json=json, params=params)
+            response = self._client.request(
+                method, path, json=json, params=params, headers=self._headers()
+            )
         except httpx.ConnectError as e:
             raise ConnectionError(f"Failed to connect to {self.base_url}: {e}") from e
         return self._handle_response(response)
@@ -113,7 +120,7 @@ class AsyncHTTPClient(_BaseClient):
 
     def __init__(
         self,
-        base_url: str = "http://localhost:3741",
+        base_url: Optional[str] = None,
         api_key: Optional[str] = None,
         timeout: float = 30.0,
         http_client: Optional[httpx.AsyncClient] = None,
@@ -121,7 +128,6 @@ class AsyncHTTPClient(_BaseClient):
         super().__init__(base_url, api_key, timeout)
         self._client = http_client or httpx.AsyncClient(
             base_url=self.base_url,
-            headers=self._headers(),
             timeout=self.timeout,
         )
         self._owns_client = http_client is None
@@ -135,7 +141,9 @@ class AsyncHTTPClient(_BaseClient):
         params: Optional[Dict[str, Any]] = None,
     ) -> Any:
         try:
-            response = await self._client.request(method, path, json=json, params=params)
+            response = await self._client.request(
+                method, path, json=json, params=params, headers=self._headers()
+            )
         except httpx.ConnectError as e:
             raise ConnectionError(f"Failed to connect to {self.base_url}: {e}") from e
         return self._handle_response(response)

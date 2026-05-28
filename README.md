@@ -10,21 +10,24 @@ pip install engram
 
 ## Quick Start
 
+Set environment variables (the SDK reads these automatically):
+
+```bash
+export ENGRAM_BASE_URL=http://localhost:8080
+export ENGRAM_API_KEY=your-api-key
+```
+
 ```python
 from engram import Engram, MemoryType, Message
 
-# Bootstrap: create a tenant (no auth required)
-client = Engram(base_url="http://localhost:3741")
-tenant = client.tenants.create(name="my-org")
-
-# Now use the API key for authenticated requests
-client = Engram(base_url="http://localhost:3741", api_key=tenant.api_key)
+# No args needed — reads ENGRAM_BASE_URL and ENGRAM_API_KEY from env
+client = Engram()
 
 # Register an agent
 agent = client.agents.create(external_id="assistant-1", name="My Assistant")
 
-# Store memories
-memory = client.memories.create(
+# Store a memory
+memory = client.memories.store(
     agent_id=agent.id,
     content="User prefers dark mode",
     type=MemoryType.PREFERENCE,
@@ -33,14 +36,14 @@ memory = client.memories.create(
 
 # Recall memories (hybrid vector + graph search)
 results = client.memories.recall(
-    query="What are the user's UI preferences?",
     agent_id=agent.id,
+    query="What are the user's UI preferences?",
     top_k=5,
 )
 for mem in results:
     print(f"[{mem.confidence:.2f}] {mem.content}")
 
-# Extract memories from conversations
+# Extract memories from a conversation
 extracted = client.memories.extract(
     agent_id=agent.id,
     conversation=[
@@ -51,6 +54,12 @@ extracted = client.memories.extract(
 )
 ```
 
+You can also pass values explicitly (overrides env vars):
+
+```python
+client = Engram(base_url="http://localhost:8080", api_key="your-api-key")
+```
+
 ## Async Support
 
 ```python
@@ -58,12 +67,13 @@ import asyncio
 from engram import AsyncEngram
 
 async def main():
-    async with AsyncEngram(api_key="mk_...") as client:
+    # Reads ENGRAM_BASE_URL and ENGRAM_API_KEY from env
+    async with AsyncEngram() as client:
         agent = await client.agents.create(
             external_id="async-agent",
             name="Async Agent",
         )
-        memory = await client.memories.create(
+        memory = await client.memories.store(
             agent_id=agent.id,
             content="User likes Python",
             type="preference",
@@ -93,7 +103,7 @@ asyncio.run(main())
 
 ```python
 # Store
-client.memories.create(agent_id, content, type=, confidence=, metadata=)
+client.memories.store(agent_id=, content=, type=, confidence=, metadata=)
 
 # Retrieve
 client.memories.get(memory_id)
@@ -102,10 +112,10 @@ client.memories.get(memory_id)
 client.memories.delete(memory_id)
 
 # Hybrid recall (vector + graph)
-client.memories.recall(query, agent_id, top_k=, type=, min_confidence=, graph_weight=, max_hops=)
+client.memories.recall(agent_id=, query=, top_k=, type=, min_confidence=, graph_weight=, max_hops=)
 
 # Extract from conversation
-client.memories.extract(agent_id, conversation, auto_store=)
+client.memories.extract(agent_id=, conversation=, auto_store=)
 ```
 
 ### Episodes
@@ -133,22 +143,23 @@ client.procedures.record_outcome(procedure_id, success)
 # Memory lifecycle
 client.cognitive.decay(agent_id)
 client.cognitive.consolidate(agent_id, scope="recent")
-client.cognitive.health(agent_id)
+client.cognitive.health()                        # aggregate stats, no agent_id
 
 # Working memory
-result = client.cognitive.activate(agent_id, cues=["dark mode"], goal="personalize UI")
-client.cognitive.session(agent_id)
-client.cognitive.update_goal(agent_id, goal="new goal")
+result = client.cognitive.activate(agent_id=, query=, goal=)
+client.cognitive.get_session(agent_id)
+client.cognitive.update_goal(agent_id, goal=)
 client.cognitive.clear_session(agent_id)
 
 # Metacognition
 client.cognitive.reflect(agent_id, focus="all")
-client.cognitive.uncertainty(agent_id, topic="preferences")
+client.cognitive.detect_uncertainty(agent_id, topic=)
+client.cognitive.assess_confidence(agent_id=, query=)
 
 # Confidence management
-client.cognitive.confidence_stats(memory_id)
-client.cognitive.reinforce(memory_id)
-client.cognitive.penalize(memory_id)
+client.cognitive.get_confidence_stats(memory_id)
+client.cognitive.reinforce(memory_id, boost=0.1)
+client.cognitive.penalize(memory_id, penalty=0.15)
 ```
 
 ### Graph
@@ -163,18 +174,18 @@ client.graph.traverse(start_ids=["..."], max_depth=3)
 
 ```python
 # Get complete mental state
-mind = client.agents.mind(agent_id)
+mind = client.agents.get_mind(agent_id)
 print(mind.beliefs)
 print(mind.procedures)
 print(mind.schemas)
 print(mind.stats)
 
 # Tier statistics
-stats = client.agents.tier_stats(agent_id)
+stats = client.agents.get_tier_stats(agent_id)
 print(f"Hot: {stats.hot_count}, Warm: {stats.warm_count}")
 
 # Hot memories (auto-injected tier)
-hot = client.agents.hot_memories(agent_id, limit=10)
+hot = client.agents.get_hot_memories(agent_id, limit=10)
 ```
 
 ## Error Handling
