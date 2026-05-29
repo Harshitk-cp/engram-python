@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional
 
 from ..types import Agent, LearningStats, Memory, MemoryPolicy, Mind, TierStats
 
@@ -17,7 +17,7 @@ class AgentListResult:
         self.limit = limit
         self.offset = offset
 
-    def __iter__(self):  # type: ignore[override]
+    def __iter__(self) -> Iterator[Agent]:
         return iter(self.agents)
 
     def __len__(self) -> int:

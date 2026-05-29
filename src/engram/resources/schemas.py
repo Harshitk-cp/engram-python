@@ -17,7 +17,7 @@ class Schemas:
     def list(self, agent_id: str) -> List[Schema]:
         """List all schemas for an agent."""
         data = self._client.request("GET", "/v1/schemas", params={"agent_id": agent_id})
-        schemas = data.get("schemas") or data if isinstance(data, list) else []
+        schemas = data if isinstance(data, list) else (data.get("schemas") or [])
         return [Schema.model_validate(s) for s in schemas]
 
     def get(self, schema_id: str) -> Schema:
@@ -31,14 +31,14 @@ class Schemas:
         """Run pattern detection on the agent's memories to surface new schemas."""
         body: Dict[str, Any] = {"agent_id": agent_id}
         data = self._client.request("POST", "/v1/schemas/detect", json=body)
-        schemas = data.get("schemas") or data if isinstance(data, list) else []
+        schemas = data if isinstance(data, list) else (data.get("schemas") or [])
         return [Schema.model_validate(s) for s in schemas]
 
     def match(self, *, agent_id: str, context: str) -> List[SchemaMatch]:
         """Find schemas whose patterns match the given context."""
         body: Dict[str, Any] = {"agent_id": agent_id, "context": context}
         data = self._client.request("POST", "/v1/schemas/match", json=body)
-        matches = data.get("matches") or data if isinstance(data, list) else []
+        matches = data if isinstance(data, list) else (data.get("matches") or [])
         return [SchemaMatch.model_validate(m) for m in matches]
 
     def validate(self, schema_id: str) -> Schema:
@@ -62,7 +62,7 @@ class AsyncSchemas:
         data = await self._client.request(
             "GET", "/v1/schemas", params={"agent_id": agent_id}
         )
-        schemas = data.get("schemas") or data if isinstance(data, list) else []
+        schemas = data if isinstance(data, list) else (data.get("schemas") or [])
         return [Schema.model_validate(s) for s in schemas]
 
     async def get(self, schema_id: str) -> Schema:
@@ -75,13 +75,13 @@ class AsyncSchemas:
     async def detect(self, agent_id: str) -> List[Schema]:
         body: Dict[str, Any] = {"agent_id": agent_id}
         data = await self._client.request("POST", "/v1/schemas/detect", json=body)
-        schemas = data.get("schemas") or data if isinstance(data, list) else []
+        schemas = data if isinstance(data, list) else (data.get("schemas") or [])
         return [Schema.model_validate(s) for s in schemas]
 
     async def match(self, *, agent_id: str, context: str) -> List[SchemaMatch]:
         body: Dict[str, Any] = {"agent_id": agent_id, "context": context}
         data = await self._client.request("POST", "/v1/schemas/match", json=body)
-        matches = data.get("matches") or data if isinstance(data, list) else []
+        matches = data if isinstance(data, list) else (data.get("matches") or [])
         return [SchemaMatch.model_validate(m) for m in matches]
 
     async def validate(self, schema_id: str) -> Schema:

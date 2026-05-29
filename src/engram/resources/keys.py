@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from ..types import APIKey, CreateKeyResult
 
@@ -35,7 +35,7 @@ class Keys:
         Returns:
             :class:`CreateKeyResult` containing the full key and metadata.
         """
-        body: dict = {"name": name}
+        body: Dict[str, Any] = {"name": name}
         if scopes is not None:
             body["scopes"] = scopes
         if expires_at is not None:
@@ -72,7 +72,7 @@ class AsyncKeys:
         expires_at: Optional[datetime] = None,
     ) -> CreateKeyResult:
         """Create a restricted API key. See :meth:`Keys.create` for details."""
-        body: dict = {"name": name}
+        body: Dict[str, Any] = {"name": name}
         if scopes is not None:
             body["scopes"] = scopes
         if expires_at is not None:

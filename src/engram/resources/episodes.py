@@ -63,7 +63,7 @@ class Episodes:
         if end is not None:
             params["end"] = end
         data = self._client.request("GET", "/v1/episodes/recall", params=params)
-        episodes = data.get("episodes") or data if isinstance(data, list) else []
+        episodes = data if isinstance(data, list) else (data.get("episodes") or [])
         return [RecalledEpisode.model_validate(e) for e in episodes]
 
     def record_outcome(
@@ -131,7 +131,7 @@ class AsyncEpisodes:
         if end is not None:
             params["end"] = end
         data = await self._client.request("GET", "/v1/episodes/recall", params=params)
-        episodes = data.get("episodes") or data if isinstance(data, list) else []
+        episodes = data if isinstance(data, list) else (data.get("episodes") or [])
         return [RecalledEpisode.model_validate(e) for e in episodes]
 
     async def record_outcome(

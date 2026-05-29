@@ -25,7 +25,7 @@ class Graph:
         if limit is not None:
             params["limit"] = limit
         data = self._client.request("GET", "/v1/graph/entities", params=params)
-        entities = data.get("entities") or data if isinstance(data, list) else []
+        entities = data if isinstance(data, list) else (data.get("entities") or [])
         return [Entity.model_validate(e) for e in entities]
 
     def get_relationships(
@@ -39,7 +39,7 @@ class Graph:
         if entity_id is not None:
             params["entity_id"] = entity_id
         data = self._client.request("GET", "/v1/graph/relationships", params=params)
-        rels = data.get("relationships") or data if isinstance(data, list) else []
+        rels = data if isinstance(data, list) else (data.get("relationships") or [])
         return [Relationship.model_validate(r) for r in rels]
 
     def traverse(
@@ -56,7 +56,7 @@ class Graph:
             "max_hops": max_hops,
         }
         data = self._client.request("POST", "/v1/graph/traverse", json=body)
-        paths = data.get("paths") or data if isinstance(data, list) else []
+        paths = data if isinstance(data, list) else (data.get("paths") or [])
         return [GraphPath.model_validate(p) for p in paths]
 
 
@@ -74,7 +74,7 @@ class AsyncGraph:
         if limit is not None:
             params["limit"] = limit
         data = await self._client.request("GET", "/v1/graph/entities", params=params)
-        entities = data.get("entities") or data if isinstance(data, list) else []
+        entities = data if isinstance(data, list) else (data.get("entities") or [])
         return [Entity.model_validate(e) for e in entities]
 
     async def get_relationships(
@@ -89,7 +89,7 @@ class AsyncGraph:
         data = await self._client.request(
             "GET", "/v1/graph/relationships", params=params
         )
-        rels = data.get("relationships") or data if isinstance(data, list) else []
+        rels = data if isinstance(data, list) else (data.get("relationships") or [])
         return [Relationship.model_validate(r) for r in rels]
 
     async def traverse(
@@ -105,5 +105,5 @@ class AsyncGraph:
             "max_hops": max_hops,
         }
         data = await self._client.request("POST", "/v1/graph/traverse", json=body)
-        paths = data.get("paths") or data if isinstance(data, list) else []
+        paths = data if isinstance(data, list) else (data.get("paths") or [])
         return [GraphPath.model_validate(p) for p in paths]

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 from ..types import MutationLog
 
@@ -31,7 +31,7 @@ class Learning:
             "outcome": outcome,
             "memories_used": memories_used or [],
         }
-        return self._client.request("POST", "/v1/learning/outcome", json=body)  # type: ignore[return-value]
+        return cast(Dict[str, Any], self._client.request("POST", "/v1/learning/outcome", json=body))
 
     def detect_feedback(
         self,
@@ -53,7 +53,7 @@ class Learning:
             "memories": memories,
             "conversation": conversation,
         }
-        return self._client.request("POST", "/v1/learning/detect-feedback", json=body)  # type: ignore[return-value]
+        return cast(Dict[str, Any], self._client.request("POST", "/v1/learning/detect-feedback", json=body))
 
     def get_mutation_history(
         self,
@@ -86,7 +86,7 @@ class AsyncLearning:
             "outcome": outcome,
             "memories_used": memories_used or [],
         }
-        return await self._client.request("POST", "/v1/learning/outcome", json=body)  # type: ignore[return-value]
+        return cast(Dict[str, Any], await self._client.request("POST", "/v1/learning/outcome", json=body))
 
     async def detect_feedback(
         self,
@@ -100,9 +100,9 @@ class AsyncLearning:
             "memories": memories,
             "conversation": conversation,
         }
-        return await self._client.request(
+        return cast(Dict[str, Any], await self._client.request(
             "POST", "/v1/learning/detect-feedback", json=body
-        )  # type: ignore[return-value]
+        ))
 
     async def get_mutation_history(
         self,

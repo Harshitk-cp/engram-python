@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from ..types import ExtractedMemory, Memory, Message, RecalledMemory
 
@@ -18,7 +18,7 @@ class RecallResult:
         self.query = query
         self.count = count
 
-    def __iter__(self):  # type: ignore[override]
+    def __iter__(self) -> Iterator[RecalledMemory]:
         return iter(self.memories)
 
     def __len__(self) -> int:
@@ -35,7 +35,7 @@ class ExtractResult:
         self.extracted = extracted
         self.count = count
 
-    def __iter__(self):  # type: ignore[override]
+    def __iter__(self) -> Iterator[ExtractedMemory]:
         return iter(self.extracted)
 
     def __len__(self) -> int:

@@ -24,7 +24,7 @@ class Procedures:
         """Find procedures matching a context string by trigger similarity."""
         body: Dict[str, Any] = {"agent_id": agent_id, "context": context, "top_k": top_k}
         data = self._client.request("POST", "/v1/procedures/match", json=body)
-        procedures = data.get("procedures") or data if isinstance(data, list) else []
+        procedures = data if isinstance(data, list) else (data.get("procedures") or [])
         return [Procedure.model_validate(p) for p in procedures]
 
     def learn(self, *, agent_id: str, episode_id: str) -> Procedure:
@@ -66,7 +66,7 @@ class AsyncProcedures:
     ) -> List[Procedure]:
         body: Dict[str, Any] = {"agent_id": agent_id, "context": context, "top_k": top_k}
         data = await self._client.request("POST", "/v1/procedures/match", json=body)
-        procedures = data.get("procedures") or data if isinstance(data, list) else []
+        procedures = data if isinstance(data, list) else (data.get("procedures") or [])
         return [Procedure.model_validate(p) for p in procedures]
 
     async def learn(self, *, agent_id: str, episode_id: str) -> Procedure:
