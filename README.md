@@ -5,8 +5,10 @@ Python SDK for [Engram](https://github.com/engram-labs/engram) — cognitive mem
 ## Installation
 
 ```bash
-pip install engram
+pip install engram.to
 ```
+
+> The import name is `engram` — `from engram import Engram`.
 
 ## Quick Start
 
@@ -89,7 +91,9 @@ asyncio.run(main())
 
 | Resource | Description |
 |----------|-------------|
-| `client.tenants` | Create tenants and obtain API keys |
+| `client.setup()` | Bootstrap a new tenant and receive a master API key |
+| `client.keys` | Create, list, and revoke API keys |
+| `client.tenants` | Legacy tenant creation (deprecated — use `setup()`) |
 | `client.agents` | Register and manage AI agents |
 | `client.memories` | Store, recall, and extract semantic memories |
 | `client.episodes` | Record and query episodic experiences |
@@ -186,6 +190,27 @@ print(f"Hot: {stats.hot_count}, Warm: {stats.warm_count}")
 
 # Hot memories (auto-injected tier)
 hot = client.agents.get_hot_memories(agent_id, limit=10)
+```
+
+### Setup & Key Management
+
+```python
+import os
+os.environ["ENGRAM_SETUP_TOKEN"] = "your-setup-token"
+
+# Bootstrap: create a tenant and get a master API key (shown once — store it)
+result = client.setup(org_name="Acme Corp")
+print(result.api_key)   # mk_<64 hex chars>
+
+# Create a restricted key
+key = client.keys.create(name="ci-pipeline", scopes=["read"])
+print(key.api_key)      # rk_<64 hex chars> — shown once
+
+# List active keys (prefixes only, never full keys)
+keys = client.keys.list()
+
+# Revoke a key (immediate effect)
+client.keys.revoke(key.key_id)
 ```
 
 ## Error Handling
