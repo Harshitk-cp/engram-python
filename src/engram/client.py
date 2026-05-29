@@ -11,13 +11,14 @@ from .resources.agents import Agents
 from .resources.cognitive import Cognitive
 from .resources.episodes import Episodes
 from .resources.feedback import FeedbackResource
+from .resources.keys import Keys
 from .resources.learning import Learning
 from .resources.graph import Graph
 from .resources.memories import Memories
 from .resources.procedures import Procedures
 from .resources.schemas import Schemas
 from .resources.tenants import Tenants
-from .types import HealthStatus, ServerMetrics
+from .types import HealthStatus, ServerMetrics, SetupResult
 
 
 class Engram:
@@ -58,6 +59,7 @@ class Engram:
         )
 
         self.tenants = Tenants(self._http)
+        self.keys = Keys(self._http)
         self.agents = Agents(self._http)
         self.memories = Memories(self._http)
         self.episodes = Episodes(self._http)
@@ -67,6 +69,28 @@ class Engram:
         self.graph = Graph(self._http)
         self.feedback = FeedbackResource(self._http)
         self.learning = Learning(self._http)
+
+    def setup(self, org_name: str, setup_token: Optional[str] = None) -> SetupResult:
+        """Bootstrap a new tenant and receive a master API key.
+
+        Calls ``POST /v1/setup`` with the ``X-Setup-Token`` header.
+        The token is read from the ``setup_token`` argument, falling back to
+        the ``ENGRAM_SETUP_TOKEN`` environment variable.
+
+        The returned ``api_key`` is shown **only once** — store it immediately.
+
+        Args:
+            org_name: Name of the organisation / tenant to create.
+            setup_token: Override for ``ENGRAM_SETUP_TOKEN`` env var.
+        """
+        import os
+        token = setup_token or os.environ.get("ENGRAM_SETUP_TOKEN", "")
+        data = self._http.request(
+            "POST", "/v1/setup",
+            json={"org_name": org_name},
+            extra_headers={"X-Setup-Token": token},
+        )
+        return SetupResult.model_validate(data)
 
     def health(self) -> HealthStatus:
         """Check server health."""

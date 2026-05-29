@@ -101,10 +101,14 @@ class SyncHTTPClient(_BaseClient):
         *,
         json: Optional[Any] = None,
         params: Optional[Dict[str, Any]] = None,
+        extra_headers: Optional[Dict[str, str]] = None,
     ) -> Any:
+        headers = self._headers()
+        if extra_headers:
+            headers.update(extra_headers)
         try:
             response = self._client.request(
-                method, path, json=json, params=params, headers=self._headers()
+                method, path, json=json, params=params, headers=headers
             )
         except httpx.ConnectError as e:
             raise ConnectionError(f"Failed to connect to {self.base_url}: {e}") from e
@@ -139,10 +143,14 @@ class AsyncHTTPClient(_BaseClient):
         *,
         json: Optional[Any] = None,
         params: Optional[Dict[str, Any]] = None,
+        extra_headers: Optional[Dict[str, str]] = None,
     ) -> Any:
+        headers = self._headers()
+        if extra_headers:
+            headers.update(extra_headers)
         try:
             response = await self._client.request(
-                method, path, json=json, params=params, headers=self._headers()
+                method, path, json=json, params=params, headers=headers
             )
         except httpx.ConnectError as e:
             raise ConnectionError(f"Failed to connect to {self.base_url}: {e}") from e

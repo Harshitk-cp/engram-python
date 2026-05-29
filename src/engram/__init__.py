@@ -13,6 +13,9 @@ from .exceptions import (
     ValidationError,
 )
 from .types import (
+    APIKey,
+    CreateKeyResult,
+    SetupResult,
     Agent,
     CognitiveHealth,
     ConfidenceAssessment,
@@ -77,6 +80,9 @@ __all__ = [
     "ReflectionFocus",
     # Core models
     "Tenant",
+    "APIKey",
+    "CreateKeyResult",
+    "SetupResult",
     "Agent",
     "Memory",
     "RecalledMemory",

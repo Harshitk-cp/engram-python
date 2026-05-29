@@ -65,13 +65,48 @@ class ConsolidationScope(str, Enum):
     FULL = "full"
 
 
-# --- Tenant ---
+# --- Tenant & API keys ---
 
 
 class Tenant(BaseModel):
     id: str
     name: str
     api_key: Optional[str] = None
+
+
+class APIKey(BaseModel):
+    """Metadata for an API key. The full key is returned only at creation time."""
+    id: str
+    tenant_id: str
+    name: str
+    key_prefix: str
+    scopes: List[str]
+    last_used_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
+    revoked_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+
+
+class SetupResult(BaseModel):
+    """Returned by POST /v1/setup. Store api_key securely — it is shown only once."""
+    tenant_id: str
+    tenant_name: str
+    key_id: str
+    key_prefix: str
+    api_key: str
+    scopes: List[str]
+    created_at: Optional[datetime] = None
+
+
+class CreateKeyResult(BaseModel):
+    """Returned by POST /v1/keys. Store api_key securely — it is shown only once."""
+    key_id: str
+    key_prefix: str
+    api_key: str
+    name: str
+    scopes: List[str]
+    expires_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
 
 
 # --- Agent ---

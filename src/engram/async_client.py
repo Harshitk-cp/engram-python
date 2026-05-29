@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional  # noqa: F401 — used in setup() signature
 
 import httpx
 
@@ -11,13 +11,14 @@ from .resources.agents import AsyncAgents
 from .resources.cognitive import AsyncCognitive
 from .resources.episodes import AsyncEpisodes
 from .resources.feedback import AsyncFeedbackResource
+from .resources.keys import AsyncKeys
 from .resources.learning import AsyncLearning
 from .resources.graph import AsyncGraph
 from .resources.memories import AsyncMemories
 from .resources.procedures import AsyncProcedures
 from .resources.schemas import AsyncSchemas
 from .resources.tenants import AsyncTenants
-from .types import HealthStatus, ServerMetrics
+from .types import HealthStatus, ServerMetrics, SetupResult
 
 
 class AsyncEngram:
@@ -58,6 +59,7 @@ class AsyncEngram:
         )
 
         self.tenants = AsyncTenants(self._http)
+        self.keys = AsyncKeys(self._http)
         self.agents = AsyncAgents(self._http)
         self.memories = AsyncMemories(self._http)
         self.episodes = AsyncEpisodes(self._http)
@@ -67,6 +69,17 @@ class AsyncEngram:
         self.graph = AsyncGraph(self._http)
         self.feedback = AsyncFeedbackResource(self._http)
         self.learning = AsyncLearning(self._http)
+
+    async def setup(self, org_name: str, setup_token: Optional[str] = None) -> SetupResult:
+        """Bootstrap a new tenant and receive a master API key. See :meth:`Engram.setup`."""
+        import os
+        token = setup_token or os.environ.get("ENGRAM_SETUP_TOKEN", "")
+        data = await self._http.request(
+            "POST", "/v1/setup",
+            json={"org_name": org_name},
+            extra_headers={"X-Setup-Token": token},
+        )
+        return SetupResult.model_validate(data)
 
     async def health(self) -> HealthStatus:
         """Check server health."""
