@@ -17,6 +17,7 @@ from .resources.graph import Graph
 from .resources.memories import Memories
 from .resources.procedures import Procedures
 from .resources.schemas import Schemas
+from .resources.scopes import Anchors, Canon, Sessions
 from .resources.tenants import Tenants
 from .types import HealthStatus, ServerMetrics, SetupResult
 
@@ -62,6 +63,9 @@ class Engram:
         self.keys = Keys(self._http)
         self.agents = Agents(self._http)
         self.memories = Memories(self._http)
+        self.anchors = Anchors(self._http)
+        self.sessions = Sessions(self._http)
+        self.canon = Canon(self._http)
         self.episodes = Episodes(self._http)
         self.procedures = Procedures(self._http)
         self.schemas = Schemas(self._http)

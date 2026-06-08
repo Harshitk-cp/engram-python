@@ -80,11 +80,20 @@ class Memories:
         confidence: Optional[float] = None,
         source: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
+        anchor_external_id: Optional[str] = None,
+        anchor_id: Optional[str] = None,
+        session_id: Optional[str] = None,
     ) -> Memory:
         """Store a memory for an agent.
 
         The server auto-classifies ``type`` via LLM if not provided.
         ``confidence`` defaults to 1.0 server-side if omitted.
+
+        Pass ``anchor_external_id`` (your own id for a subject — customer/guest/
+        patient) to bind the memory to that subject (``binding="anchored"``); the
+        anchor is auto-created on first use. Pass ``session_id`` to bind it to a
+        conversation (``binding="session"``, short-term). Omit both for the agent's
+        own private memory — today's default behavior.
         """
         body: Dict[str, Any] = {"agent_id": agent_id, "content": content}
         if type is not None:
@@ -95,6 +104,12 @@ class Memories:
             body["source"] = source
         if metadata is not None:
             body["metadata"] = metadata
+        if anchor_external_id is not None:
+            body["anchor_external_id"] = anchor_external_id
+        if anchor_id is not None:
+            body["anchor_id"] = anchor_id
+        if session_id is not None:
+            body["session_id"] = session_id
         data = self._client.request("POST", "/v1/memories/", json=body)
         return Memory.model_validate(data)
 
@@ -117,6 +132,9 @@ class Memories:
         min_confidence: Optional[float] = None,
         graph_weight: Optional[float] = None,
         max_hops: Optional[int] = None,
+        anchor_external_id: Optional[str] = None,
+        anchor_id: Optional[str] = None,
+        session_id: Optional[str] = None,
     ) -> RecallResult:
         """Hybrid vector + graph recall.
 
@@ -125,6 +143,11 @@ class Memories:
 
         ``graph_weight`` (0–1) controls the graph/vector blend; the complement
         is used as ``vector_weight``. Default server-side split is 0.4/0.6.
+
+        Pass ``anchor_external_id`` to restrict recall to one subject — you get
+        only that subject's memory plus the agent's private notes and tenant canon,
+        never another subject's. Add ``session_id`` to also fold in a conversation's
+        short-term context (composed recall).
         """
         params: Dict[str, Any] = {"agent_id": agent_id, "query": query, "top_k": top_k}
         if type is not None:
@@ -135,6 +158,12 @@ class Memories:
             params["graph_weight"] = graph_weight
         if max_hops is not None:
             params["max_hops"] = max_hops
+        if anchor_external_id is not None:
+            params["anchor_external_id"] = anchor_external_id
+        if anchor_id is not None:
+            params["anchor_id"] = anchor_id
+        if session_id is not None:
+            params["session_id"] = session_id
         data = self._client.request("GET", "/v1/memories/recall", params=params)
         return _parse_recall(data)
 
@@ -171,6 +200,9 @@ class AsyncMemories:
         confidence: Optional[float] = None,
         source: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
+        anchor_external_id: Optional[str] = None,
+        anchor_id: Optional[str] = None,
+        session_id: Optional[str] = None,
     ) -> Memory:
         body: Dict[str, Any] = {"agent_id": agent_id, "content": content}
         if type is not None:
@@ -181,6 +213,12 @@ class AsyncMemories:
             body["source"] = source
         if metadata is not None:
             body["metadata"] = metadata
+        if anchor_external_id is not None:
+            body["anchor_external_id"] = anchor_external_id
+        if anchor_id is not None:
+            body["anchor_id"] = anchor_id
+        if session_id is not None:
+            body["session_id"] = session_id
         data = await self._client.request("POST", "/v1/memories/", json=body)
         return Memory.model_validate(data)
 
@@ -201,6 +239,9 @@ class AsyncMemories:
         min_confidence: Optional[float] = None,
         graph_weight: Optional[float] = None,
         max_hops: Optional[int] = None,
+        anchor_external_id: Optional[str] = None,
+        anchor_id: Optional[str] = None,
+        session_id: Optional[str] = None,
     ) -> RecallResult:
         params: Dict[str, Any] = {"agent_id": agent_id, "query": query, "top_k": top_k}
         if type is not None:
@@ -211,6 +252,12 @@ class AsyncMemories:
             params["graph_weight"] = graph_weight
         if max_hops is not None:
             params["max_hops"] = max_hops
+        if anchor_external_id is not None:
+            params["anchor_external_id"] = anchor_external_id
+        if anchor_id is not None:
+            params["anchor_id"] = anchor_id
+        if session_id is not None:
+            params["session_id"] = session_id
         data = await self._client.request("GET", "/v1/memories/recall", params=params)
         return _parse_recall(data)
 

@@ -154,8 +154,34 @@ class Memory(BaseModel):
     tier: Optional[MemoryTier] = None
     tier_reason: Optional[str] = None
     decay_status: Optional[DecayStatus] = None
+    binding: Optional[str] = None
+    anchor_id: Optional[str] = None
+    session_id: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+
+
+class Anchor(BaseModel):
+    id: str
+    name: Optional[str] = None
+    entity_type: Optional[str] = None
+    external_id: Optional[str] = None
+    tenant_id: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+    created_at: Optional[datetime] = None
+
+
+class Session(BaseModel):
+    id: str
+    agent_id: str
+    tenant_id: Optional[str] = None
+    anchor_id: Optional[str] = None
+    external_id: Optional[str] = None
+    status: Optional[str] = None  # "active" | "ended" | "expired"
+    metadata: Optional[Dict[str, Any]] = None
+    started_at: Optional[datetime] = None
+    ended_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
 
 
 class RecalledMemory(Memory):

@@ -17,6 +17,7 @@ from .resources.graph import AsyncGraph
 from .resources.memories import AsyncMemories
 from .resources.procedures import AsyncProcedures
 from .resources.schemas import AsyncSchemas
+from .resources.scopes import AsyncAnchors, AsyncCanon, AsyncSessions
 from .resources.tenants import AsyncTenants
 from .types import HealthStatus, ServerMetrics, SetupResult
 
@@ -62,6 +63,9 @@ class AsyncEngram:
         self.keys = AsyncKeys(self._http)
         self.agents = AsyncAgents(self._http)
         self.memories = AsyncMemories(self._http)
+        self.anchors = AsyncAnchors(self._http)
+        self.sessions = AsyncSessions(self._http)
+        self.canon = AsyncCanon(self._http)
         self.episodes = AsyncEpisodes(self._http)
         self.procedures = AsyncProcedures(self._http)
         self.schemas = AsyncSchemas(self._http)
